@@ -1,6 +1,22 @@
 # Short-URL
 Open source short URL maker
 
+## Usage
+
+Visit [https://gshort.site](https://gshort.site) to use the URL shortener. Enter a long URL in the input field and click the "Shorten" button. After a few minutes, the shortened URL will be available.
+
+## Forking and Using This Repo
+
+To fork this repository and use it for yourself:
+
+1. Fork the repository on GitHub.
+2. Clone the forked repository to your local machine.
+3. Update the `CNAME` file with your custom domain (if you have one).
+4. Update the `BASE_URL` and `TOKEN` constants in `index.html` with your GitHub repository details and a personal access token.
+5. Update the API call where this comment is located: ```Update "USERNAME" and "REPOSITORY" respectively```
+6. Enable GitHub Pages for your repository.
+7. Push your changes to the `main` branch.
+
 ## How It Works
 
 This project is a proof of concept for a URL shortener that uses GitHub Actions to create short versions of URLs. The main components are:
@@ -15,20 +31,6 @@ This project is a proof of concept for a URL shortener that uses GitHub Actions 
 - **data/urls.js**: Stores the URL mappings in a JavaScript object format.
 - **.github/workflows/update-url-mappings.yml**: Defines a GitHub Actions workflow that triggers when a new issue is opened. It extracts the short and long URLs from the issue body, updates `data/urls.js`, and commits the changes back to the repository.
 
-## Usage
-
-Visit [https://gshort.site](https://gshort.site) to use the URL shortener. Enter a long URL in the input field and click the "Shorten" button. After a few minutes, the shortened URL will be available.
-
-## Forking and Using This Repo
-
-To fork this repository and use it for yourself:
-
-1. Fork the repository on GitHub.
-2. Clone the forked repository to your local machine.
-3. Update the `CNAME` file with your custom domain (if you have one).
-4. Update the `BASE_URL` and `TOKEN` constants in `index.html` with your GitHub repository details and a personal access token.
-5. Enable GitHub Pages for your repository.
-6. Push your changes to the `main` branch.
 
 ### License
 

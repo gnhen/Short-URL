@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data/gh.png">
+    <title>GNH URL Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width: 500px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: white;
+            background-color: gray;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4%;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>URL Shortener</h1>
+    <h3>Please allow about 3 minutes for the URL to process</h3>
+    <input type="url" id="long-url" placeholder="Enter URL to shorten" required>
+    <button onclick="shortenURL()">Shorten</button>
+
+    <div class="result" id="result"></div>
+
+    <br><br><br><br><br><br><br>
+    <div style="text-align: center;">
+        <p>
+            <font size="+2">
+                <u><b>This is a proof of concept.</b></u>
+            </font> <br><br>
+            <font size="+1">This <u>Free</u>, <u>Public</u> URL shortener uses GitHub Actions to create a short version
+                of
+                any URL.
+                <br><br> Please feel free to use this <b>limited</b> version! <br><br> <a
+                    href="https://github.com/gnhen/Short-URL" target="_blank">Please
+                    read the README.md file
+                    for
+                    details on
+                    how to create your own reposiory!</a>
+            </font>
+        <details>
+            <summary>Technical Details</summary>
+            <p>This uses a GitHub automated workflow to add the URL to a .js file, along with its short counterpart. It
+                uses a javascript file to avoid having to use a json database and host it somewhere, making this
+                completely available on GitHub Pages, with no cost to the user.</p>
+            <br>
+            <p>The URL has to run through the workflow, then once it is loaded into <b>urls.js</b>, github pages
+                <i>then</i> has to complete its job of uploading the new urls.js to the website. <b>Only then</b> will
+                the URL
+                work.
+            </p>
+        </details>
+        <style>
+            details {
+                border: 1px solid black;
+                padding: 10px;
+                border-radius: 5px;
+                width: 50%;
+                margin: 0 auto;
+            }
+
+            summary {
+                cursor: pointer;
+            }
+        </style>
+        </p>
+    </div>
+
+    <footer>
+        &copy; 2024 Grant Hendricks. This work is licensed under a Creative Commons Attribution-NonCommercial 4.0
+        International License. You are free to use and copy this work, but not for commercial purposes.
+    </footer>
+
+    <script>
+        const BASE_URL = '<ADD-YOUR-URL-HERE>'; // This could be any URL you have access to, including your GitHub Pages URL
+        const TOKEN = '<ADD-YOUR-URL-HERE>'; // This is a personal access token with repo scope. Required.
+
+        function generateShortCode() {
+            return Math.random().toString(36).substring(2, 7);
+        }
+
+        async function shortenURL() {
+            const longURL = document.getElementById('long-url').value;
+            if (!longURL) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            const shortCode = generateShortCode();
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('https://api.github.com/repos/USERNAME/REPOSITORY/issues', { // Update "USERNAME" and "REPOSITORY" respectively
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/vnd.github+json',
+                        'Authorization': `Bearer ${TOKEN}`,
+                    },
+                    body: JSON.stringify({
+                        title: `Add URL: ${shortCode}`,
+                        body: JSON.stringify({
+                            short_url: shortCode,
+                            long_url: longURL,
+                        }),
+                    }),
+                });
+
+                if (response.ok) {
+                    const shortURL = `${BASE_URL}?s=${shortCode}`;
+                    resultDiv.innerHTML = `Your shortened URL:<br><a href="${shortURL}">${shortURL}</a>`;
+                } else {
+                    resultDiv.innerHTML = 'Error creating short URL.';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = 'Error: Could not create short URL.';
+            }
+        }
+
+        async function handleRedirect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const shortCode = urlParams.get('s'); // Get the short code from the query parameter
+            if (!shortCode) return;
+
+            try {
+                const script = document.createElement('script');
+                script.src = 'data/urls.js?' + new Date().getTime();
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+
+                if (window.URL_DATABASE?.[shortCode]) {
+                    window.location.href = window.URL_DATABASE[shortCode];
+                } else {
+                    throw new Error('Short URL not found');
+                }
+            } catch (error) {
+                console.error('Redirect error:', error);
+                document.body.innerHTML = `Error: ${error.message}`;
+            }
+        }
+
+        handleRedirect();
+    </script>
+</body>
+
+</html>

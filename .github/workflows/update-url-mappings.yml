@@ -1,0 +1,51 @@
+name: Update URL Mappings
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  update-mappings:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Process new URL entry
+      run: |
+        ISSUE_BODY=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.body')
+        SHORT=$(echo "$ISSUE_BODY" | jq -r '.short_url')
+        LONG=$(echo "$ISSUE_BODY" | jq -r '.long_url')
+
+        if [[ -z "$SHORT" || -z "$LONG" ]]; then
+          echo "Error: Invalid issue format"
+          exit 1
+        fi
+
+        # Create new entry with proper escaping
+        NEW_ENTRY=$(printf '  "%s": "%s"' "$SHORT" "$LONG")
+        
+        # Update urls.js using awk instead of sed
+        if [ ! -f data/urls.js ]; then
+          echo "window.URL_DATABASE = {" > data/urls.js
+          echo "$NEW_ENTRY" >> data/urls.js
+          echo "};" >> data/urls.js
+        else
+          awk -v entry="$NEW_ENTRY" '
+          /\};/ { print "," entry; }
+          { print }
+          ' data/urls.js > data/urls.js.tmp && mv data/urls.js.tmp data/urls.js
+        fi
+
+    - name: Commit and push changes
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<>"
+        git add data/urls.js
+        git commit -m "Add URL mapping for ${SHORT}"
+        git push origin main
