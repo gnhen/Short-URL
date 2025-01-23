@@ -3,7 +3,7 @@ Open source short URL maker
 
 ## Usage
 
-### [https://gshort.site](https://gshort.site)
+### [http://gshort.site](http://gshort.site)
 
 Visit [https://gshort.site](https://gshort.site) to use the URL shortener. Enter a long URL in the input field and click the "Shorten" button. After a few minutes, the shortened URL will be available.
 
